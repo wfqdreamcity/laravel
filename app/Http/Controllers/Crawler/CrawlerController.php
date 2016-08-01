@@ -30,20 +30,30 @@ class CrawlerController extends Controller{
     //爬虫 url抓取
     public function getUrl(Request $request){
 
-        $url = 'http://www.qiushibaike.com/';
-        $baseurl = isset($request->url)?$request->url:$url;
+        $baseurl = 'http://www.qiushibaike.com/';
+        $url = isset($request->url)?$request->url:$baseurl;
 
         $start =true;
-        //while($start){
+        $num=0;
+        $arr=array();
+        while($start){
 
             //获取网页内容
-            $contents = $this->getWebContent($baseurl);
-            echo json_encode($contents);
+            //$contents = $this->getWebContent($baseurl);
+            $contents = file_get_contents($url);
+            //echo $contents;
             //获取页面中合法url
             $result = $this->getUrlByRegex($contents);
 
-            echo json_encode($result);
-        //}
+            $url = $baseurl.$result['0'];
+
+            $num ++;
+            $arr[] = $url;
+            if($num>30){
+                $start=false;
+            }
+        }
+        echo json_encode($arr);
 
 
     }
@@ -51,10 +61,7 @@ class CrawlerController extends Controller{
     //获取内容中的url
     public function getUrlByRegex($content){
 
-        preg_match_all('/http:\/\/[0-9a-z\.\/\-]+\/[0-9a-z\.\/\-]+\.([0-9a-z\.\/\-]+)/',$content,$result);
-        foreach ($result['0'] as $key =>$url){
-            $extend =$result['1'][$key];
-        }
+        preg_match('#[0-9a-z]+\/page\/[0-9]+\/\?s=[0-9]+#',$content,$result);
 
         return $result;
 
@@ -79,6 +86,10 @@ class CrawlerController extends Controller{
             "password" => "12345"
         );
         //curl_setopt($curl, CURLOPT_POSTFIELDS, $post_data);
+
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array (
+            "Content-Type: text/xml"
+        ) );
         //执行命令
         $data = curl_exec($curl);
         //关闭URL请求
