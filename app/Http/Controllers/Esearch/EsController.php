@@ -17,7 +17,7 @@ class EsController extends Controller{
 
     }
     //创建index
-    public function index(){
+    public function index_test(){
 
         $data['index'] ="test";
         $data['type']="laravel";
@@ -43,8 +43,8 @@ class EsController extends Controller{
     //seach
     public function search(){
 
-        $data['index']="test";
-        $data['type'] = 'laravel';
+        $data['index']="crawler";
+        $data['type'] = 'index';
         $data['body'] ='
         {
             "query":{
@@ -55,6 +55,26 @@ class EsController extends Controller{
         $list = $this->Client->search($data);
 
         echo json_encode($list);
+    }
+
+    public function index(array $para,$type='index'){
+
+        $data['index'] ="crawler";
+        $data['type']=$type;
+
+        //如果已经存在不在添加
+        $reuslt = $this->Client->searchExists($data);
+        if($reuslt){
+            return false;
+        }
+
+
+        $data['body']  =$para;
+
+        $result =  $this->Client->index($data);
+
+        return true;
+
     }
 
 

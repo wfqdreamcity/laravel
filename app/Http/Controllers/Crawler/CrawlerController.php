@@ -14,6 +14,10 @@ namespace App\Http\Controllers\Crawler;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Request;
+use Goutte\Client;
+use App\Http\Controllers\Esearch;
+use Mockery\Exception;
+use Log;
 
 
 class CrawlerController extends Controller{
@@ -22,87 +26,57 @@ class CrawlerController extends Controller{
     //爬虫 数据分析
     public function analyse(Request $request){
 
+        $client = new Client();
 
+        // Go to the symfony.com website
+        $crawler = $client->request('GET','http://www.qiushibaike.com/');
 
-    }
+        $status =true;
+        $num = 0;
+        while ($status){
+            //分析数据
+            $crawler->filter('div.article')->each(function ($node) {
+                    try{
+                        $data = array();
+                        $str = $node->filter('h2')->text();
+                        $data['user'] =$str;
+//                        $link = $node->selectLink($str);
+//                        $link->each(function ($link_node) {
+//                            print $link_node->link()->geturi();
+//                        });
+                        $data['praiseNum'] = $node->filter('span.stats-vote > i')->text();
+                        $data['commentNun'] = $node->filter('a > i.number')->text();
+                        $data['content'] = $node->filter('div.content')->text();
 
+                        $obj = new Esearch\EsController();
+                        $obj->index($data);
 
-    //爬虫 url抓取
-    public function getUrl(Request $request){
+                    }catch (\InvalidArgumentException $err){
+                        Log::info('content empty !!!');
+                        echo $err->getMessage();
+                    }
+            });
 
-        $baseurl = 'http://www.qiushibaike.com/';
-        $url = isset($request->url)?$request->url:$baseurl;
+            $num++;
 
-        $start =true;
-        $num=0;
-        $arr=array();
-        while($start) {
+            //获取下一页链接
+            $link = $crawler->selectLink('下一页');
+           try{
+                $link = $link->link();
+               $crawler = $client->click($link);
 
-            //获取网页内容
-            //$contents = $this->getWebContent($baseurl);
-            $contents = @file_get_contents($url);
+           }catch (\InvalidArgumentException $err){
+               Log::info('next page=>'.$num);
+               sleep(10);
+               $crawler = $client->request('GET','http://www.qiushibaike.com/');
+           }
 
-            if (!empty($contents)) {
-
-                //获取页面中合法url
-                $result = $this->getUrlByRegex($contents);
-
-                $url = $baseurl . $result['0'];
-
-                $arr[] = $url;
-            }else{
-                $start=false;
-            }
-
-            $num ++;
-            if($num>30){
-                $start=false;
+            if($num>15){
+                $status=false;
             }
         }
 
-        echo json_encode($arr);
 
-
-    }
-
-    //获取内容中的url
-    public function getUrlByRegex($content){
-
-        preg_match('#[0-9a-z]+\/page\/[0-9]+\/\?s=[0-9]+#',$content,$result);
-
-        return $result;
-
-    }
-
-    //获取网页内容
-    public function getWebContent($url){
-
-        //初始化
-        $curl = curl_init();
-        //设置抓取的url
-        curl_setopt($curl, CURLOPT_URL, $url);
-        //设置头文件的信息作为数据流输出
-        curl_setopt($curl, CURLOPT_HEADER, 1);
-        //设置获取的信息以文件流的形式返回，而不是直接输出。
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        //设置post方式提交
-        curl_setopt($curl, CURLOPT_POST, 1);
-        //设置post数据
-        $post_data = array(
-            "username" => "coder",
-            "password" => "12345"
-        );
-        //curl_setopt($curl, CURLOPT_POSTFIELDS, $post_data);
-
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array (
-            "Content-Type: text/xml"
-        ) );
-        //执行命令
-        $data = curl_exec($curl);
-        //关闭URL请求
-        curl_close($curl);
-
-        return $data;
 
     }
 

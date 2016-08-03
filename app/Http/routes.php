@@ -15,7 +15,8 @@
 Route::group(['namespace' => 'Crawler'], function(){
     // 控制器在 "App\Http\Controllers\Crawler" 命名空间下
 
-    Route::get('/crawlerstart','CrawlerController@getUrl');
+    //Route::get('/crawlerstart','CrawlerController@getUrl');
+    Route::get('/crawlerstart','CrawlerController@analyse');
 });
 
 
