@@ -36,23 +36,30 @@ class CrawlerController extends Controller{
         $start =true;
         $num=0;
         $arr=array();
-        while($start){
+        while($start) {
 
             //获取网页内容
             //$contents = $this->getWebContent($baseurl);
-            $contents = file_get_contents($url);
-            //echo $contents;
-            //获取页面中合法url
-            $result = $this->getUrlByRegex($contents);
+            $contents = @file_get_contents($url);
 
-            $url = $baseurl.$result['0'];
+            if (!empty($contents)) {
+
+                //获取页面中合法url
+                $result = $this->getUrlByRegex($contents);
+
+                $url = $baseurl . $result['0'];
+
+                $arr[] = $url;
+            }else{
+                $start=false;
+            }
 
             $num ++;
-            $arr[] = $url;
             if($num>30){
                 $start=false;
             }
         }
+
         echo json_encode($arr);
 
 
