@@ -47,6 +47,7 @@ class EsController extends Controller{
         $data['type'] = 'index';
         $data['body'] ='
         {
+            "size":100,
             "query":{
                 "match_all":{}
             }

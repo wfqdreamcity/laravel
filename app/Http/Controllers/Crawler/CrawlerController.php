@@ -19,6 +19,7 @@ use App\Http\Controllers\Esearch;
 use Mockery\Exception;
 use Log;
 
+set_time_limit(0);
 
 class CrawlerController extends Controller{
 
@@ -63,17 +64,14 @@ class CrawlerController extends Controller{
             $link = $crawler->selectLink('下一页');
            try{
                 $link = $link->link();
+               Log::info('link=>'.$link->getUri());
                $crawler = $client->click($link);
 
            }catch (\InvalidArgumentException $err){
                Log::info('next page=>'.$num);
-               sleep(10);
+               sleep(600);
                $crawler = $client->request('GET','http://www.qiushibaike.com/');
            }
-
-            if($num>15){
-                $status=false;
-            }
         }
 
 
