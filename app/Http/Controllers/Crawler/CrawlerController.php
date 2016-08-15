@@ -29,14 +29,15 @@ class CrawlerController extends Controller{
 
         $client = new Client();
 
+        $url = 'http://www.qiushibaike.com/';
         // Go to the symfony.com website
-        $crawler = $client->request('GET','http://www.qiushibaike.com/');
+        $crawler = $client->request('GET',$url);
 
         $status =true;
         $num = 0;
         while ($status){
             //分析数据
-            $crawler->filter('div.article')->each(function ($node) {
+            $crawler->filter('div.article')->each(function ($node) use(&$client,&$num,&$url) {
                     try{
                         $data = array();
                         $str = $node->filter('h2')->text();
@@ -48,9 +49,15 @@ class CrawlerController extends Controller{
                         $data['praiseNum'] = $node->filter('span.stats-vote > i')->text();
                         $data['commentNun'] = $node->filter('a > i.number')->text();
                         $data['content'] = $node->filter('div.content')->text();
+                        $data['time'] = time();
 
                         $obj = new Esearch\EsController();
-                        $obj->index($data);
+                        $result = $obj->index($data);
+                        if(!$result){
+                            Log::info('get all new info=>'.$num);
+                            sleep(600);
+                            $crawler = $client->request('GET',$url);
+                        }
 
                     }catch (\InvalidArgumentException $err){
                         Log::info('content empty !!!');
@@ -70,7 +77,7 @@ class CrawlerController extends Controller{
            }catch (\InvalidArgumentException $err){
                Log::info('next page=>'.$num);
                sleep(600);
-               $crawler = $client->request('GET','http://www.qiushibaike.com/');
+               $crawler = $client->request('GET',$url);
            }
         }
 

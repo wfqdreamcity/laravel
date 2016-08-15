@@ -62,13 +62,13 @@ class EsController extends Controller{
 
         $data['index'] ="crawler";
         $data['type']=$type;
+        $data['id']=MD5(json_encode($para));
 
         //如果已经存在不在添加
-        $reuslt = $this->Client->searchExists($data);
+        $reuslt = $this->Client->exists($data);
         if($reuslt){
             return false;
         }
-
 
         $data['body']  =$para;
 
