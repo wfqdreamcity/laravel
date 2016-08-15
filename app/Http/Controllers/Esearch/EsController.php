@@ -58,7 +58,7 @@ class EsController extends Controller{
         echo json_encode($list);
     }
 
-    public function index(array $para,$type='index'){
+    public function index(array $para,$type='crawler'){
 
         $data['index'] ="crawler";
         $data['type']=$type;

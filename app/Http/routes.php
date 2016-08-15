@@ -22,6 +22,7 @@ Route::group(['namespace' => 'Crawler'], function(){
 
 Route::get('/index','Esearch\EsController@index');
 Route::get('/search','Esearch\EsController@search');
+Route::get('/search_test','Esearch\EsController@index_test');
 
 Route::get('/get','Redis\RedisController@get');
 Route::get('/set','Redis\RedisController@set');
