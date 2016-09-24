@@ -64,12 +64,14 @@ class EsController extends Controller{
         $data['type']=$type;
         $data['id']=MD5(json_encode($para));
 
+
         //如果已经存在不在添加
         $reuslt = $this->Client->exists($data);
         if($reuslt){
             return false;
         }
 
+        $para['id']=MD5(json_encode($para));
         $data['body']  =$para;
 
         $result =  $this->Client->index($data);
