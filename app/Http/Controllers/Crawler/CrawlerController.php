@@ -55,7 +55,7 @@ class CrawlerController extends Controller{
                         $result = $obj->index($data);
                         if(!$result){
                             Log::info('get all new info=>'.$num);
-                            sleep(600);
+                            sleep(10);
                             $crawler = $client->request('GET',$url);
                         }
 
@@ -76,7 +76,7 @@ class CrawlerController extends Controller{
 
            }catch (\InvalidArgumentException $err){
                Log::info('next page=>'.$num);
-               sleep(600);
+               sleep(10);
                $crawler = $client->request('GET',$url);
            }
         }
